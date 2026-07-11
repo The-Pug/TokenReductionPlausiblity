@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+.env.example
+.claude
+data
+uv.lock
+hello.txt
+run_eval.py
+**/__pycache__
+*.pyc
+README.md

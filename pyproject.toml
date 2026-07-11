@@ -1,0 +1,12 @@
+[project]
+name = "act2-router"
+version = "0.1.0"
+description = "OcellusLabs — token-efficient hybrid routing agent (AMD Hackathon ACT II, Track 1)"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.50",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+package = false
