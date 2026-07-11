@@ -11,7 +11,7 @@ INPUT_PATH = os.environ.get("INPUT_PATH", "/input/tasks.json")
 OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "/output/results.json")
 TIME_BUDGET = float(os.environ.get("TIME_BUDGET_SECONDS", 540))
 RESERVE = 60
-LOCAL_CONCURRENCY = int(os.environ.get("LOCAL_CONCURRENCY", 2))
+LOCAL_CONCURRENCY = int(os.environ.get("LOCAL_CONCURRENCY", 1))
 
 
 async def run(tasks: list[dict]) -> list[dict]:

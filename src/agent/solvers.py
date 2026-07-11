@@ -77,17 +77,39 @@ def python_compiles(text: str) -> bool:
     return False
 
 
-_LEN_SENT = re.compile(r"in (one|1|two|2|three|3) sentences?", re.I)
-_LEN_WORDS = re.compile(r"in (?:at most |under |no more than )?(\d+) words", re.I)
-_WORDS_TO_N = {"one": 1, "1": 1, "two": 2, "2": 2, "three": 3, "3": 3}
+_LEN_SENT = re.compile(
+    r"in ((?:exactly|at most|no more than) )?(one|1|two|2|three|3|four|4|five|5) sentences?", re.I)
+_LEN_WORDS = re.compile(r"in (?:exactly |at most |under |no more than )?(\d+) words", re.I)
+_LEN_BULLETS = re.compile(
+    r"(?:in|as|into) ((?:exactly|at most|no more than) )?(one|1|two|2|three|3|four|4|five|5|\d+) bullet(?: ?points?)?", re.I)
+_BULLET_WORD_CAP = re.compile(
+    r"each (?:bullet |point |one )?(?:no longer than|no more than|under|at most|within) (\d+) words", re.I)
+_BULLET_LINE = re.compile(r"^\s*(?:[-*•]|\d+[.)])\s+")
+_WORDS_TO_N = {"one": 1, "1": 1, "two": 2, "2": 2, "three": 3, "3": 3,
+               "four": 4, "4": 4, "five": 5, "5": 5}
 
 
 def meets_length_constraint(prompt: str, answer: str) -> bool:
+    m = _LEN_BULLETS.search(prompt)
+    if m:
+        n = _WORDS_TO_N.get(m.group(2).lower()) or int(m.group(2))
+        bullets = [l for l in answer.strip().splitlines() if _BULLET_LINE.match(l)]
+        exact = not m.group(1) or "exactly" in m.group(1).lower()
+        if (len(bullets) != n) if exact else (len(bullets) > n):
+            return False
+        cap = _BULLET_WORD_CAP.search(prompt)
+        if cap:
+            limit = int(cap.group(1))
+            for b in bullets:
+                if len(_BULLET_LINE.sub("", b).split()) > limit:
+                    return False
+        return True
     m = _LEN_SENT.search(prompt)
     if m:
-        n = _WORDS_TO_N[m.group(1).lower()]
+        n = _WORDS_TO_N[m.group(2).lower()]
         sentences = [s for s in re.split(r"[.!?]+(?:\s|$)", answer.strip()) if s.strip()]
-        return len(sentences) <= n
+        exact = bool(m.group(1)) and "exactly" in m.group(1).lower()
+        return len(sentences) == n if exact else len(sentences) <= n
     m = _LEN_WORDS.search(prompt)
     if m:
         return len(answer.split()) <= int(m.group(1)) * 1.1

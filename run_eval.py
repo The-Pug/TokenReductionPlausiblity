@@ -54,7 +54,7 @@ def grade(task: dict, answer: str) -> bool:
         return solvers.final_number(answer) == ref
     if cat == "sentiment":
         m = re.search(r"\b(positive|negative|neutral|mixed)\b", answer, re.I)
-        return bool(m) and m.group(1).lower() == ref
+        return bool(m) and m.group(1).lower() in ref.lower().split("|")
     if cat in ("code_generation", "code_debugging") and task.get("test"):
         return run_code_test(answer, task["test"])
     ok = keyword_match(answer, ref)

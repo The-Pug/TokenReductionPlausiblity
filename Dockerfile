@@ -11,8 +11,9 @@ RUN sh -c 'ollama serve >/tmp/pull.log 2>&1 & \
     ollama pull gemma3:1b'
 
 ENV OLLAMA_KEEP_ALIVE=-1 \
-    OLLAMA_NUM_PARALLEL=2 \
+    OLLAMA_NUM_PARALLEL=1 \
     LOCAL_MODEL=gemma3:1b \
+    LOCAL_REQUEST_TIMEOUT=9 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app

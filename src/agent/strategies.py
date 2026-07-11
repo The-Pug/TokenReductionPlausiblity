@@ -70,16 +70,21 @@ STRATEGIES: dict[str, Strategy] = {
     "math": Strategy(
         system=("Solve step by step, briefly. End with a final line: "
                 "'Answer: <number>'."),
-        verify=_verify_math, samples=2, agree_on="number", local_max_tokens=400,
+        verify=_verify_math, samples=1, agree_on="number", local_max_tokens=350,
         escalate_if=_math_is_trappy, tier="large", remote_max_tokens=500),
     "sentiment": Strategy(
         system=("Classify the sentiment as positive, negative, neutral, or mixed. "
-                "State the label first, then justify it in one sentence."),
-        verify=_verify_sentiment, samples=2, agree_on="label", local_max_tokens=140,
+                "State the label first, then justify it in one sentence. If the text "
+                "contains both positive and negative elements, your justification "
+                "must explicitly mention both sides."),
+        verify=_verify_sentiment, samples=1, agree_on="label", local_max_tokens=140,
         tier="gemma", remote_max_tokens=300),
     "summarization": Strategy(
         system=("Summarise faithfully and obey any format or length constraint "
-                "exactly. Output only the summary."),
+                "exactly: if asked for N sentences give exactly N sentences, if "
+                "asked for N bullet points give exactly N lines each starting "
+                "with '- ', respecting any per-bullet word limit. Output only "
+                "the summary."),
         verify=_verify_summary, samples=1, local_max_tokens=220,
         tier="gemma", remote_max_tokens=350),
     "ner": Strategy(
