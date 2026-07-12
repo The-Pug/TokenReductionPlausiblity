@@ -21,9 +21,9 @@ class Completion:
 
 class Model:
     def __init__(self, base_url: str, api_key: str, model: str,
-                 timeout: float = REQUEST_TIMEOUT):
+                 timeout: float = REQUEST_TIMEOUT, max_retries: int = 1):
         self.client = AsyncOpenAI(base_url=base_url, api_key=api_key,
-                                  timeout=timeout, max_retries=1)
+                                  timeout=timeout, max_retries=max_retries)
         self.model = model
 
     def with_model(self, model: str) -> "Model":
@@ -55,6 +55,7 @@ def local_model() -> Model:
         os.environ.get("LOCAL_API_KEY", "ollama"),
         os.environ.get("LOCAL_MODEL", "gemma3:1b"),
         timeout=float(os.environ.get("LOCAL_REQUEST_TIMEOUT", REQUEST_TIMEOUT)),
+        max_retries=0,
     )
 
 

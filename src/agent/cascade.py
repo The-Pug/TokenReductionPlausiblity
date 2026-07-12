@@ -41,9 +41,13 @@ class Agent:
                 temperature=0.0 if i == 0 else 0.7,
                 max_tokens=strat.local_max_tokens)
 
+        tasks = [asyncio.ensure_future(one(i)) for i in range(strat.samples)]
         try:
-            completions = await asyncio.gather(*(one(i) for i in range(strat.samples)))
+            completions = await asyncio.gather(*tasks)
         except Exception as e:
+            for t in tasks:
+                t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
             return ("", False, f"local_error:{type(e).__name__}")
         texts = [c.text for c in completions]
         signals = [agreement_signal(strat.agree_on, c.text) for c in completions]

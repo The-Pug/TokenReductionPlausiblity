@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN sh -c 'ollama serve >/tmp/pull.log 2>&1 & \
     i=0; until ollama list >/dev/null 2>&1; do \
         i=$((i+1)); [ $i -ge 60 ] && cat /tmp/pull.log && exit 1; sleep 1; done; \
-    ollama pull gemma3:1b'
+    ollama pull gemma3:1b; \
+    ollama list | grep -q gemma3:1b || { echo "gemma3:1b missing after pull"; cat /tmp/pull.log; exit 1; }'
 
 ENV OLLAMA_KEEP_ALIVE=-1 \
     OLLAMA_NUM_PARALLEL=2 \
