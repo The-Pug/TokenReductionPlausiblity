@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import time
 from dataclasses import dataclass, field
@@ -34,17 +35,18 @@ class Agent:
             print(msg, file=sys.stderr, flush=True)
 
     async def _local_attempt(self, prompt: str, strat) -> tuple[str, bool, str]:
-        texts, signals = [], []
-        for i in range(strat.samples):
-            try:
-                c = await self.local.complete(
-                    prompt, system=strat.system,
-                    temperature=0.0 if i == 0 else 0.7,
-                    max_tokens=strat.local_max_tokens)
-            except Exception as e:
-                return ("", False, f"local_error:{type(e).__name__}")
-            texts.append(c.text)
-            signals.append(agreement_signal(strat.agree_on, c.text))
+        async def one(i: int):
+            return await self.local.complete(
+                prompt, system=strat.system,
+                temperature=0.0 if i == 0 else 0.7,
+                max_tokens=strat.local_max_tokens)
+
+        try:
+            completions = await asyncio.gather(*(one(i) for i in range(strat.samples)))
+        except Exception as e:
+            return ("", False, f"local_error:{type(e).__name__}")
+        texts = [c.text for c in completions]
+        signals = [agreement_signal(strat.agree_on, c.text) for c in completions]
 
         best = texts[0]
         if not strat.verify(prompt, best):
